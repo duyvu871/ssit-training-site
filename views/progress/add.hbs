@@ -1,0 +1,144 @@
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <!-- Course Info Header -->
+        <div class="mb-6">
+            <div class="flex items-center space-x-3 mb-3">
+                <h1 class="text-3xl font-bold text-gray-900">{{course.name}}</h1>
+                <span class="{{#if (eq course.track 'frontend')}}bg-purple-100 text-purple-800{{else}}bg-green-100 text-green-800{{/if}} text-sm font-medium px-3 py-1 rounded-full">
+                    {{#if (eq course.track 'frontend')}}Frontend{{else}}Backend{{/if}}
+                </span>
+                <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                    {{course.level}}
+                </span>
+            </div>
+            
+            <!-- Tech Stack -->
+            <div class="mb-4">
+                <div class="text-sm font-medium text-gray-700 mb-2">Tech Stack:</div>
+                <div class="flex flex-wrap gap-2">
+                    {{#each course.techStack}}
+                        <span class="bg-gray-100 text-gray-800 text-sm font-medium px-2.5 py-1 rounded">
+                            {{this}}
+                        </span>
+                    {{/each}}
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4 text-sm text-gray-600">
+                <div class="flex items-center">
+                    <i class="fas fa-clock text-gray-400 mr-2"></i>
+                    <span>{{course.duration}} ngày</span>
+                </div>
+                {{#if course.projectUrl}}
+                    <a href="{{course.projectUrl}}" target="_blank" class="text-blue-600 hover:text-blue-800 flex items-center">
+                        <i class="fas fa-external-link-alt mr-2"></i>
+                        Chi tiết khóa học
+                    </a>
+                {{/if}}
+            </div>
+        </div>
+
+        <!-- Progress Form -->
+        <form action="/progress/add/{{course.id}}" method="POST" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Ngày đào tạo <span class="text-red-500">*</span>
+                    </label>
+                    <input type="date" name="date" required max="{{today}}"
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <p class="mt-1 text-sm text-gray-500">Chọn ngày bạn thực hiện đào tạo</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Số giờ đào tạo <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" name="hours" required min="0.5" max="24" step="0.5"
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="4">
+                    <p class="mt-1 text-sm text-gray-500">Nhập số giờ bạn đã dành cho việc học</p>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Nội dung đang học <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="currentContent" required
+                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                       placeholder="Ví dụ: React Components, Express Routing, ...">
+                <p class="mt-1 text-sm text-gray-500">Mô tả ngắn gọn nội dung bạn đang học</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Ghi chú
+                </label>
+                <textarea name="notes" rows="3"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          placeholder="Ghi chú thêm về quá trình học (không bắt buộc)"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Trạng thái hoàn thành
+                </label>
+                <select name="completionStatus"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="not_started">Chưa bắt đầu</option>
+                    <option value="in_progress" selected>Đang thực hiện</option>
+                    <option value="completed">Đã hoàn thành</option>
+                </select>
+            </div>
+
+            <div class="flex items-start">
+                <div class="flex items-center h-5">
+                    <input type="checkbox" name="needsSupport"
+                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                </div>
+                <div class="ml-3">
+                    <label class="text-sm font-medium text-gray-700">Cần hỗ trợ</label>
+                    <p class="text-sm text-gray-500">Đánh dấu nếu bạn cần được hỗ trợ thêm về nội dung này</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <a href="/courses/{{course.id}}"
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>Quay lại
+                </a>
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium">
+                    <i class="fas fa-save mr-2"></i>Lưu tiến độ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Auto-resize textarea
+    document.addEventListener('DOMContentLoaded', function () {
+        const textareas = document.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+
+        // Show/hide support tip based on checkbox
+        const needsSupport = document.getElementById('needsSupport');
+        const notes = document.getElementById('notes');
+
+        needsSupport.addEventListener('change', function () {
+            if (this.checked) {
+                notes.placeholder = 'Vui lòng mô tả chi tiết vấn đề bạn đang gặp phải để được hỗ trợ tốt nhất...';
+                notes.focus();
+            } else {
+                notes.placeholder = 'Ghi chú về quá trình đào tạo, khó khăn gặp phải, điều cần cải thiện...';
+            }
+        });
+    });
+</script>

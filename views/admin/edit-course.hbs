@@ -1,0 +1,331 @@
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">
+            {{#if course.id}}Chỉnh sửa khóa học{{else}}Thêm khóa học mới{{/if}}
+        </h1>
+        <a href="/admin/courses" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+            <i class="fas fa-arrow-left mr-2"></i>Quay lại
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Form Section -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <form id="courseForm" method="POST" action="{{#if course.id}}/admin/courses/{{course.id}}?_method=PUT{{else}}/admin/courses{{/if}}" class="space-y-6">
+                    <div id="messageContainer"></div>
+                    {{#if success_msg}}
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-green-700">{{success_msg}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {{/if}}
+                    {{#if error_msg}}
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700">{{error_msg}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {{/if}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Tên khóa học <span class="text-red-500">*</span></label>
+                        <input type="text" name="name" required minlength="3" maxlength="100" value="{{course.name}}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <p class="mt-1 text-xs text-gray-500">Tên khóa học từ 3-100 ký tự</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Mô tả <span class="text-red-500">*</span></label>
+                        <div class="mt-1">
+                            <textarea name="description" rows="5" required minlength="10" maxlength="1000"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{course.description}}</textarea>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Mô tả chi tiết về khóa học, từ 10-1000 ký tự</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Track <span class="text-red-500">*</span></label>
+                            <select name="track" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="frontend" {{#if (eq course.track 'frontend')}}selected{{/if}}>Frontend</option>
+                                <option value="backend" {{#if (eq course.track 'backend')}}selected{{/if}}>Backend</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">Chọn hướng đào tạo chính</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Level <span class="text-red-500">*</span></label>
+                            <select name="level" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="basic" {{#if (eq course.level 'basic')}}selected{{/if}}>Basic - Cơ bản</option>
+                                <option value="advanced" {{#if (eq course.level 'advanced')}}selected{{/if}}>Advanced - Nâng cao</option>
+                                <option value="final" {{#if (eq course.level 'final')}}selected{{/if}}>Final - Hoàn thiện</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">Mức độ khóa học</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Tech Stack <span class="text-red-500">*</span></label>
+                        <div class="mt-1">
+                            <input type="text" name="techStack" required value="{{#if course.techStack}}{{join course.techStack ', '}}{{/if}}"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="React, JavaScript, TypeScript, ...">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Các công nghệ sử dụng trong khóa học, phân cách bằng dấu phẩy. Tối đa 10 công nghệ.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Thời lượng (ngày) <span class="text-red-500">*</span></label>
+                            <input type="number" name="duration" required min="1" max="90" value="{{course.duration}}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <p class="mt-1 text-xs text-gray-500">Thời gian dự kiến để hoàn thành khóa học (1-90 ngày)</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Project URL</label>
+                            <input type="text" name="projectUrl" maxlength="255" value="{{course.projectUrl}}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="./FE-training.md">
+                            <p class="mt-1 text-xs text-gray-500">Link đến tài liệu chi tiết của khóa học (tối đa 255 ký tự)</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" name="isActive" {{#if course.isActive}}checked{{/if}}
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label class="ml-2 block text-sm text-gray-900">Kích hoạt khóa học</label>
+                        <p class="ml-6 text-xs text-gray-500">Chỉ những khóa học được kích hoạt mới hiển thị cho học viên</p>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-6">
+                        <a href="/admin/courses"
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-sm font-medium">
+                            Hủy
+                        </a>
+                        <button type="submit"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium">
+                            {{#if course.id}}Cập nhật{{else}}Tạo mới{{/if}}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Xem trước</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900" id="previewName">{{course.name}}</h3>
+                        <div class="flex items-center space-x-2 mt-2">
+                            <span id="previewTrack" 
+                                class="{{#if (eq course.track 'frontend')}}bg-purple-100 text-purple-800{{else}}bg-green-100 text-green-800{{/if}} text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                {{#if (eq course.track 'frontend')}}Frontend{{else}}Backend{{/if}}
+                            </span>
+                            <span id="previewLevel" class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                {{course.level}}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-sm text-gray-600" id="previewDescription">{{course.description}}</p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700">Tech Stack:</h4>
+                        <div class="flex flex-wrap gap-2 mt-2" id="previewTechStack">
+                            {{#each course.techStack}}
+                            <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">{{this}}</span>
+                            {{/each}}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-4 border-t">
+                        <div>
+                            <span class="text-sm text-gray-500">Thời lượng</span>
+                            <p class="text-lg font-semibold text-gray-900" id="previewDuration">{{course.duration}} ngày</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Trạng thái</span>
+                            <p class="text-lg font-semibold" id="previewStatus">
+                                <span class="{{#if course.isActive}}text-green-600{{else}}text-red-600{{/if}}">
+                                    {{#if course.isActive}}Đang mở{{else}}Đã đóng{{/if}}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{#if course.id}}
+            <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Thống kê</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-sm text-gray-500">Số học viên</span>
+                        <p class="text-lg font-semibold text-gray-900">{{course._count.enrollments}}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">Ngày tạo</span>
+                        <p class="text-lg font-semibold text-gray-900">{{formatDate course.createdAt}}</p>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+<script>
+// Live preview functionality
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('courseForm');
+    
+    // Update preview on input change
+    form.addEventListener('input', (e) => {
+        const target = e.target;
+        
+        switch(target.name) {
+            case 'name':
+                document.getElementById('previewName').textContent = target.value;
+                break;
+            
+            case 'description':
+                document.getElementById('previewDescription').textContent = target.value;
+                break;
+            
+            case 'track':
+                const trackSpan = document.getElementById('previewTrack');
+                trackSpan.textContent = target.value === 'frontend' ? 'Frontend' : 'Backend';
+                trackSpan.className = target.value === 'frontend' 
+                    ? 'bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full'
+                    : 'bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full';
+                break;
+            
+            case 'level':
+                document.getElementById('previewLevel').textContent = target.value;
+                break;
+            
+            case 'techStack':
+                const techStackDiv = document.getElementById('previewTechStack');
+                const techs = target.value.split(',').map(t => t.trim()).filter(t => t);
+                techStackDiv.innerHTML = techs.map(tech => 
+                    `<span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">${tech}</span>`
+                ).join('');
+                break;
+            
+            case 'duration':
+                document.getElementById('previewDuration').textContent = `${target.value} ngày`;
+                break;
+            
+            case 'isActive':
+                const statusSpan = document.getElementById('previewStatus');
+                statusSpan.innerHTML = target.checked
+                    ? '<span class="text-green-600">Đang mở</span>'
+                    : '<span class="text-red-600">Đã đóng</span>';
+                break;
+        }
+    });
+});
+
+document.getElementById('courseForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const messageContainer = document.getElementById('messageContainer');
+    
+    // Convert FormData to object with proper data types
+    const data = {
+        name: formData.get('name'),
+        description: formData.get('description'),
+        duration: parseInt(formData.get('duration')),
+        track: formData.get('track'),
+        level: formData.get('level'),
+        techStack: formData.get('techStack') ? formData.get('techStack').split(',').map(tech => tech.trim()).filter(tech => tech) : [],
+        projectUrl: formData.get('projectUrl'),
+        isActive: formData.get('isActive') === 'on'
+    };
+    
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'text/html'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const html = await response.text();
+        
+        // Create a temporary div to parse the HTML response
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        
+        // Find success or error message in the response
+        const successMsg = tempDiv.querySelector('.bg-green-50');
+        const errorMsg = tempDiv.querySelector('.bg-red-50');
+        
+        // Update the message container
+        messageContainer.innerHTML = '';
+        if (successMsg) {
+            messageContainer.appendChild(successMsg.cloneNode(true));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (errorMsg) {
+            messageContainer.appendChild(errorMsg.cloneNode(true));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Update form fields with new values in case they changed
+        const newForm = tempDiv.querySelector('#courseForm');
+        if (newForm) {
+            const formFields = newForm.querySelectorAll('input, textarea, select');
+            formFields.forEach(field => {
+                const currentField = form.querySelector(`[name="${field.name}"]`);
+                if (currentField) {
+                    currentField.value = field.value;
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        messageContainer.innerHTML = `
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">Có lỗi xảy ra khi cập nhật khóa học</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+});
+</script> 

@@ -1,0 +1,271 @@
+<div class="container mx-auto px-4 py-6">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Quản lý yêu cầu hỗ trợ</h1>
+            <p class="text-gray-600 mt-2">Xử lý các yêu cầu hỗ trợ từ nhân viên</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="/admin" 
+               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Quay lại Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="bg-white rounded-lg shadow-md mb-6">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+                <a href="/admin/support?status=pending" 
+                   class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm {{#if (eq currentStatus 'pending')}}border-red-500 text-red-600{{/if}}">
+                    <i class="fas fa-clock mr-2"></i>Chờ xử lý ({{pendingCount}})
+                </a>
+                <a href="/admin/support?status=in_progress" 
+                   class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm {{#if (eq currentStatus 'in_progress')}}border-yellow-500 text-yellow-600{{/if}}">
+                    <i class="fas fa-spinner mr-2"></i>Đang xử lý ({{inProgressCount}})
+                </a>
+                <a href="/admin/support?status=resolved" 
+                   class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm {{#if (eq currentStatus 'resolved')}}border-green-500 text-green-600{{/if}}">
+                    <i class="fas fa-check mr-2"></i>Đã giải quyết ({{resolvedCount}})
+                </a>
+                <a href="/admin/support" 
+                   class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm {{#unless currentStatus}}border-blue-500 text-blue-600{{/unless}}">
+                    <i class="fas fa-list mr-2"></i>Tất cả ({{totalCount}})
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Support Requests List -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">
+                Danh sách yêu cầu hỗ trợ
+                {{#if currentStatus}}
+                    - {{#if (eq currentStatus 'pending')}}Chờ xử lý{{/if}}
+                    {{#if (eq currentStatus 'in_progress')}}Đang xử lý{{/if}}
+                    {{#if (eq currentStatus 'resolved')}}Đã giải quyết{{/if}}
+                {{/if}}
+            </h2>
+        </div>
+        
+        {{#if supportRequests.length}}
+            <div class="divide-y divide-gray-200">
+                {{#each supportRequests}}
+                    <div class="p-6 hover:bg-gray-50">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <h3 class="text-lg font-medium text-gray-900 mr-3">{{title}}</h3>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                        {{#if (eq priority 'high')}}bg-red-100 text-red-800{{/if}}
+                                        {{#if (eq priority 'medium')}}bg-yellow-100 text-yellow-800{{/if}}
+                                        {{#if (eq priority 'low')}}bg-green-100 text-green-800{{/if}}">
+                                        {{#if (eq priority 'high')}}Cao{{/if}}
+                                        {{#if (eq priority 'medium')}}Trung bình{{/if}}
+                                        {{#if (eq priority 'low')}}Thấp{{/if}}
+                                    </span>
+                                </div>
+                                
+                                <div class="text-sm text-gray-600 mb-3">
+                                    <div class="flex items-center space-x-4">
+                                        <span><i class="fas fa-user mr-1"></i>{{user.name}}</span>
+                                        <span><i class="fas fa-book mr-1"></i>{{course.name}}</span>
+                                        <span><i class="fas fa-calendar mr-1"></i>{{formatDate createdAt}}</span>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-gray-700 mb-4">{{description}}</p>
+                                
+                                {{#if images.length}}
+                                    <div class="mb-4">
+                                        <h4 class="text-sm font-medium text-gray-700 mb-2">Hình ảnh đính kèm:</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            {{#each images}}
+                                                <img src="{{url}}" alt="Support image" 
+                                                     class="w-20 h-20 object-cover rounded border cursor-pointer hover:opacity-80"
+                                                     onclick="showImageModal('{{url}}')">
+                                            {{/each}}
+                                        </div>
+                                    </div>
+                                {{/if}}
+                                
+                                {{#if adminResponse}}
+                                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+                                        <div class="flex">
+                                            <div class="flex-shrink-0">
+                                                <i class="fas fa-reply text-blue-400"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <h4 class="text-sm font-medium text-blue-800">Phản hồi từ Admin:</h4>
+                                                <p class="text-sm text-blue-700 mt-1">{{adminResponse}}</p>
+                                                {{#if responseDate}}
+                                                    <p class="text-xs text-blue-600 mt-1">{{formatDate responseDate}}</p>
+                                                {{/if}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {{/if}}
+                            </div>
+                            
+                            <div class="ml-6 flex flex-col space-y-2">
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                    {{#if (eq status 'pending')}}bg-red-100 text-red-800{{/if}}
+                                    {{#if (eq status 'in_progress')}}bg-yellow-100 text-yellow-800{{/if}}
+                                    {{#if (eq status 'resolved')}}bg-green-100 text-green-800{{/if}}">
+                                    {{#if (eq status 'pending')}}Chờ xử lý{{/if}}
+                                    {{#if (eq status 'in_progress')}}Đang xử lý{{/if}}
+                                    {{#if (eq status 'resolved')}}Đã giải quyết{{/if}}
+                                </span>
+                                
+                                {{#unless (eq status 'resolved')}}
+                                    <button onclick="showResponseModal({{id}})" 
+                                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium">
+                                        <i class="fas fa-reply mr-1"></i>Phản hồi
+                                    </button>
+                                {{/unless}}
+                                
+                                {{#if (eq status 'pending')}}
+                                    <button onclick="updateStatus({{id}}, 'in_progress')" 
+                                            class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-xs font-medium">
+                                        <i class="fas fa-play mr-1"></i>Bắt đầu xử lý
+                                    </button>
+                                {{/if}}
+                                
+                                {{#if (eq status 'in_progress')}}
+                                    <button onclick="updateStatus({{id}}, 'resolved')" 
+                                            class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-medium">
+                                        <i class="fas fa-check mr-1"></i>Hoàn thành
+                                    </button>
+                                {{/if}}
+                            </div>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        {{else}}
+            <div class="text-center py-12">
+                <i class="fas fa-life-ring text-4xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Không có yêu cầu hỗ trợ</h3>
+                <p class="text-gray-500">
+                    {{#if currentStatus}}
+                        Không có yêu cầu hỗ trợ nào với trạng thái này.
+                    {{else}}
+                        Chưa có yêu cầu hỗ trợ nào từ nhân viên.
+                    {{/if}}
+                </p>
+            </div>
+        {{/if}}
+    </div>
+</div>
+
+<!-- Response Modal -->
+<div id="responseModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Phản hồi yêu cầu hỗ trợ</h3>
+            <form id="responseForm">
+                <input type="hidden" id="supportRequestId" name="supportRequestId">
+                <div class="mb-4">
+                    <label for="adminResponse" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nội dung phản hồi <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="adminResponse" name="adminResponse" rows="4" required
+                              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Nhập phản hồi của bạn..."></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeResponseModal()" 
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded text-sm font-medium">
+                        Hủy
+                    </button>
+                    <button type="submit" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">
+                        Gửi phản hồi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div id="imageModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 w-auto max-w-3xl">
+        <div class="bg-white rounded-lg shadow-lg">
+            <div class="flex justify-end p-4">
+                <button onclick="closeImageModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="px-6 pb-6">
+                <img id="modalImage" src="" alt="Support image" class="max-w-full h-auto rounded">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showResponseModal(supportRequestId) {
+    document.getElementById('supportRequestId').value = supportRequestId;
+    document.getElementById('responseModal').classList.remove('hidden');
+}
+
+function closeResponseModal() {
+    document.getElementById('responseModal').classList.add('hidden');
+    document.getElementById('responseForm').reset();
+}
+
+function showImageModal(imageUrl) {
+    document.getElementById('modalImage').src = imageUrl;
+    document.getElementById('imageModal').classList.remove('hidden');
+}
+
+function closeImageModal() {
+    document.getElementById('imageModal').classList.add('hidden');
+}
+
+document.getElementById('responseForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const supportRequestId = formData.get('supportRequestId');
+    const adminResponse = formData.get('adminResponse');
+    
+    fetch(`/admin/support/${supportRequestId}/respond`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ adminResponse })
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Có lỗi xảy ra khi gửi phản hồi');
+        }
+    });
+});
+
+function updateStatus(supportRequestId, newStatus) {
+    const statusText = {
+        'in_progress': 'bắt đầu xử lý',
+        'resolved': 'đánh dấu đã hoàn thành'
+    };
+    
+    if (confirm(`Bạn có chắc chắn muốn ${statusText[newStatus]} yêu cầu hỗ trợ này?`)) {
+        fetch(`/admin/support/${supportRequestId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: newStatus })
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra khi cập nhật trạng thái');
+            }
+        });
+    }
+}
+</script> 

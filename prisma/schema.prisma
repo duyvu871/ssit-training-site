@@ -1,0 +1,197 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Session model for connect-pg-simple compatibility
+model Session {
+  sid    String   @id @map("sid") 
+  sess   Json     @map("sess")
+  expire DateTime @map("expire")
+
+  @@map("user_sessions")
+  @@index([expire])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("user") // "user" or "admin"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courseEnrollments CourseEnrollment[]
+  supportRequests   SupportRequest[]
+  forumPosts       ForumPost[]
+  forumComments    ForumComment[]
+  notifications    Notification[]
+
+  @@map("users")
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  duration    Int      @default(20) // Thời lượng khóa học (ngày)
+  track       String   @default("frontend") // "frontend" or "backend"
+  level       String   @default("basic")// "basic", "advanced", "final"
+  techStack   String[] // Technologies used in the course
+  projectUrl  String?  // URL to project details/requirements
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  enrollments CourseEnrollment[]
+  supportRequests SupportRequest[]
+  forumPosts ForumPost[]
+
+  @@map("courses")
+}
+
+model CourseEnrollment {
+  id           String   @id @default(cuid())
+  userId       String
+  courseId     String
+  status       String   @default("active") // "active", "completed", "paused", "dropped"
+  enrolledAt   DateTime @default(now())
+  completedAt  DateTime?
+  completionPercentage Float @default(0)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  trainingProgress TrainingProgress[]
+
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
+}
+
+model TrainingProgress {
+  id                String   @id @default(cuid())
+  enrollmentId      String
+  date              DateTime @default(now())
+  hours             Float    // Số giờ training trong ngày
+  currentContent    String   // Nội dung đang đào tạo hiện tại
+  notes             String?  // Ghi chú của nhân viên
+  needsSupport      Boolean  @default(false) // Có cần hỗ trợ không
+  completionStatus  String   @default("in_progress") // "not_started", "in_progress", "completed"
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  enrollment CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, date])
+  @@map("training_progress")
+}
+
+model SupportRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  title       String
+  content     String
+  status      String   @default("open") // "open", "in_progress", "resolved"
+  priority    String   @default("normal") // "low", "normal", "high", "urgent"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  resolvedAt  DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  images SupportRequestImage[]
+
+  @@map("support_requests")
+}
+
+model SupportRequestImage {
+  id        String   @id @default(cuid())
+  requestId String
+  imageUrl  String
+  filename  String
+  createdAt DateTime @default(now())
+
+  supportRequest SupportRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@map("support_request_images")
+}
+
+model ForumPost {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  title     String
+  content   String
+  isPinned  Boolean  @default(false) // Ghim bài viết quan trọng
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  comments ForumComment[]
+  images   ForumPostImage[]
+
+  @@map("forum_posts")
+}
+
+model ForumPostImage {
+  id       String   @id @default(cuid())
+  postId   String
+  imageUrl String
+  filename String
+  createdAt DateTime @default(now())
+
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("forum_post_images")
+}
+
+model ForumComment {
+  id       String   @id @default(cuid())
+  postId   String
+  userId   String
+  content  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images ForumCommentImage[]
+
+  @@map("forum_comments")
+}
+
+model ForumCommentImage {
+  id        String   @id @default(cuid())
+  commentId String
+  imageUrl  String
+  filename  String
+  createdAt DateTime @default(now())
+
+  comment ForumComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@map("forum_comment_images")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  content   String
+  type      String   // "system", "forum", "course", "admin"
+  isRead    Boolean  @default(false)
+  link      String?  // Optional link to redirect when clicked
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+} 

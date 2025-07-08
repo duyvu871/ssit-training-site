@@ -1,0 +1,62 @@
+{
+  "name": "Training-Track",
+  "version": "1.0.0",
+  "description": "Ứng dụng quản lý tiến độ training cho nhân viên công ty",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "cross-env NODE_ENV=development nodemon server.js",
+    "dev:db": "docker-compose -f docker-compose.dev.yml up -d",
+    "dev:db:stop": "docker-compose -f docker-compose.dev.yml down",
+    "dev:full": "npm run dev:db && npm run dev",
+    "build:css": "tailwindcss -i ./styles/input.css -o ./public/css/styles.css --watch",
+    "build:css:prod": "tailwindcss -i ./styles/input.css -o ./public/css/styles.css --minify",
+    "docker:prod": "docker-compose up -d",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:stop": "docker-compose down",
+    "docker:stop:dev": "docker-compose -f docker-compose.dev.yml down",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:dev": "dotenv -e .env.development -- prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "seed:dev": "dotenv -e .env.development -- prisma db seed",
+    "seed:prod": "dotenv -e .env.production -- prisma db seed"
+  },
+  "keywords": [
+    "training",
+    "progress",
+    "management"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.7.1",
+    "bcryptjs": "^2.4.3",
+    "connect-flash": "^0.1.1",
+    "connect-pg-simple": "^9.0.1",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "express-handlebars": "^7.1.2",
+    "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
+    "flash": "^1.1.0",
+    "moment": "^2.30.1",
+    "morgan": "^1.10.0",
+    "morgan-json": "^1.1.0",
+    "multer": "^1.4.5-lts.1",
+    "rotating-file-stream": "^3.2.6",
+    "uuid": "^9.0.1",
+    "tailwindcss": "^3.3.6",
+    "@tailwindcss/forms": "^0.5.7",
+    "dotenv-cli": "^8.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "prisma": "^5.7.1"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}

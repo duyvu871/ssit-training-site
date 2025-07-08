@@ -1,0 +1,161 @@
+<div class="container mx-auto px-4 py-6">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Dashboard Admin</h1>
+        <p class="text-gray-600 mt-2">Tổng quan hệ thống quản lý đào tạo nhân viên</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                    <i class="fas fa-users text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-2xl font-bold text-gray-900">{{stats.totalUsers}}</h3>
+                    <p class="text-gray-600 text-sm">Tổng nhân viên</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                    <i class="fas fa-book text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-2xl font-bold text-gray-900">{{stats.totalCourses}}</h3>
+                    <p class="text-gray-600 text-sm">Khóa học</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                    <i class="fas fa-user-graduate text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-2xl font-bold text-gray-900">{{stats.totalEnrollments}}</h3>
+                    <p class="text-gray-600 text-sm">Đăng ký</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-red-100 text-red-600">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-2xl font-bold text-gray-900">{{stats.pendingSupportRequests}}</h3>
+                    <p class="text-gray-600 text-sm">Yêu cầu hỗ trợ</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-book mr-2"></i>Quản lý khóa học
+            </h3>
+            <p class="text-gray-600 mb-4">Tạo, chỉnh sửa và quản lý các khóa đào tạo</p>
+            <a href="/admin/courses" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium inline-block">
+                Quản lý khóa học
+            </a>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-users mr-2"></i>Quản lý nhân viên
+            </h3>
+            <p class="text-gray-600 mb-4">Xem và quản lý thông tin nhân viên</p>
+            <a href="/admin/users" 
+               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium inline-block">
+                Quản lý nhân viên
+            </a>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-life-ring mr-2"></i>Hỗ trợ
+            </h3>
+            <p class="text-gray-600 mb-4">Xử lý yêu cầu hỗ trợ từ nhân viên</p>
+            <a href="/admin/support" 
+               class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium inline-block">
+                Xử lý hỗ trợ
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Users -->
+        <div class="bg-white rounded-lg shadow-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Nhân viên mới nhất</h3>
+            </div>
+            <div class="p-6">
+                {{#if recentUsers.length}}
+                    <div class="space-y-4">
+                        {{#each recentUsers}}
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                                        <span class="text-white font-medium">
+                                            {{substring name 0 1}}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <div class="text-sm font-medium text-gray-900">{{name}}</div>
+                                    <div class="text-sm text-gray-500">{{email}}</div>
+                                </div>
+                                <div class="text-sm text-gray-400">
+                                    {{formatDate createdAt}}
+                                </div>
+                            </div>
+                        {{/each}}
+                    </div>
+                {{else}}
+                    <p class="text-gray-500 text-center py-4">Chưa có nhân viên mới</p>
+                {{/if}}
+            </div>
+        </div>
+
+        <!-- Recent Support Requests -->
+        <div class="bg-white rounded-lg shadow-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Yêu cầu hỗ trợ gần đây</h3>
+            </div>
+            <div class="p-6">
+                {{#if recentSupportRequests.length}}
+                    <div class="space-y-4">
+                        {{#each recentSupportRequests}}
+                            <div class="border-l-4 border-red-400 pl-4">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <h4 class="text-sm font-medium text-gray-900">{{title}}</h4>
+                                        <p class="text-sm text-gray-600 mt-1">{{user.name}} - {{course.name}}</p>
+                                        <p class="text-xs text-gray-500 mt-1">{{formatDate createdAt}}</p>
+                                    </div>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                        {{#if (eq priority 'high')}}bg-red-100 text-red-800{{/if}}
+                                        {{#if (eq priority 'medium')}}bg-yellow-100 text-yellow-800{{/if}}
+                                        {{#if (eq priority 'low')}}bg-green-100 text-green-800{{/if}}">
+                                        {{priority}}
+                                    </span>
+                                </div>
+                            </div>
+                        {{/each}}
+                    </div>
+                {{else}}
+                    <p class="text-gray-500 text-center py-4">Không có yêu cầu hỗ trợ mới</p>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div> 

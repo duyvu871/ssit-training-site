@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: training-track-db
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "127.0.0.1:5444:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - training-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U training_user -d training_track"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Training Track Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: training-track-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3400:3400"
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+    volumes:
+      - ./public/uploads:/app/public/uploads
+      - logs:/app/logs
+    networks:
+      - training-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3400/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        npx prisma db push --skip-generate &&
+        if [ $$(node -e 'const { PrismaClient } = require(\"@prisma/client\"); const prisma = new PrismaClient(); prisma.user.count().then(count => { console.log(count); process.exit(0); }).catch(() => { console.log(0); process.exit(1); })') -eq 0 ]; then
+          echo 'Database is empty, running seed...' &&
+          npx prisma db seed;
+        else
+          echo 'Database already has data, skipping seed...';
+        fi &&
+        npm start
+      "
+
+  redis:
+    image: redis:7-alpine
+    container_name: training-track-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6399:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - training-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  logs:
+    driver: local
+
+networks:
+  training-network:
+    driver: bridge 
